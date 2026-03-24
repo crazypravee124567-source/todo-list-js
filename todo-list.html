@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Todo List</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      background: #f0f4f8;
+      display: flex;
+      justify-content: center;
+      padding: 40px 20px;
+    }
+
+    .container {
+      background: white;
+      border-radius: 12px;
+      padding: 30px;
+      max-width: 500px;
+      width: 100%;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+
+    h1 {
+      text-align: center;
+      color: #2d3748;
+      margin-bottom: 24px;
+      font-size: 24px;
+    }
+
+    /* Input Area */
+    .input-area {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 24px;
+    }
+
+    .input-area input {
+      flex: 1;
+      padding: 10px 14px;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      font-size: 15px;
+      outline: none;
+    }
+
+    .input-area input:focus {
+      border-color: #667eea;
+    }
+
+    .input-area button {
+      padding: 10px 18px;
+      background: #667eea;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 15px;
+      cursor: pointer;
+    }
+
+    .input-area button:hover {
+      background: #5a67d8;
+    }
+
+    /* Task Item */
+    .task-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: #f7fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 12px 16px;
+      margin-bottom: 10px;
+    }
+
+    .task-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .task-name {
+      font-size: 15px;
+      color: #2d3748;
+    }
+
+    .task-name.done {
+      text-decoration: line-through;
+      color: #a0aec0;
+    }
+
+    .badge {
+      font-size: 12px;
+      padding: 2px 10px;
+      border-radius: 20px;
+      font-weight: bold;
+    }
+
+    .badge.pending {
+      background: #fefcbf;
+      color: #b7791f;
+    }
+
+    .badge.completed {
+      background: #c6f6d5;
+      color: #276749;
+    }
+
+    /* Buttons */
+    .btn-complete {
+      background: #48bb78;
+      color: white;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 13px;
+      margin-right: 6px;
+    }
+
+    .btn-complete:hover {
+      background: #38a169;
+    }
+
+    .btn-remove {
+      background: #fc8181;
+      color: white;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 13px;
+    }
+
+    .btn-remove:hover {
+      background: #e53e3e;
+    }
+
+    .btn-complete:disabled {
+      background: #a0aec0;
+      cursor: not-allowed;
+    }
+
+    /* Empty message */
+    .empty-msg {
+      text-align: center;
+      color: #a0aec0;
+      font-size: 14px;
+      padding: 20px 0;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h1>📝 Todo List</h1>
+
+    <div class="input-area">
+      <input type="text" id="taskInput" placeholder="Enter a new task..." />
+      <button onclick="handleAdd()">Add</button>
+    </div>
+
+    <div id="taskList"></div>
+  </div>
+
+  <script>
+    // Step 1: Create Todo List
+    let todoList = [
+      { task: "Learn JavaScript", completed: false },
+      { task: "Practice coding",  completed: false }
+    ];
+
+    // Step 2: Add a new task
+    function addTask(taskName) {
+      todoList.push({ task: taskName, completed: false });
+    }
+
+    // Step 3: Mark task as completed
+    function completeTask(taskName) {
+      todoList.forEach(function(item) {
+        if (item.task === taskName) {
+          item.completed = true;
+        }
+      });
+    }
+
+    // Step 4: Remove a task
+    function removeTask(taskName) {
+      todoList = todoList.filter(function(item) {
+        return item.task !== taskName;
+      });
+    }
+
+    // Step 5: Render tasks to page
+    function renderTasks() {
+      let taskList = document.getElementById("taskList");
+      taskList.innerHTML = "";
+
+      if (todoList.length === 0) {
+        taskList.innerHTML = '<p class="empty-msg">No tasks yet! Add one above. 🎉</p>';
+        return;
+      }
+
+      todoList.forEach(function(item) {
+        let div = document.createElement("div");
+        div.className = "task-item";
+
+        div.innerHTML = `
+          <div class="task-left">
+            <span class="task-name ${item.completed ? 'done' : ''}">${item.task}</span>
+            <span class="badge ${item.completed ? 'completed' : 'pending'}">
+              ${item.completed ? '✅ Completed' : '⏳ Pending'}
+            </span>
+          </div>
+          <div>
+            <button class="btn-complete"
+              onclick="handleComplete('${item.task}')"
+              ${item.completed ? 'disabled' : ''}>
+              Done
+            </button>
+            <button class="btn-remove" onclick="handleRemove('${item.task}')">
+              Remove
+            </button>
+          </div>
+        `;
+
+        taskList.appendChild(div);
+      });
+    }
+
+    // Button handlers
+    function handleAdd() {
+      let input = document.getElementById("taskInput");
+      let taskName = input.value.trim();
+      if (taskName === "") return;
+      addTask(taskName);
+      input.value = "";
+      renderTasks();
+    }
+
+    function handleComplete(taskName) {
+      completeTask(taskName);
+      renderTasks();
+    }
+
+    function handleRemove(taskName) {
+      removeTask(taskName);
+      renderTasks();
+    }
+
+    // Allow pressing Enter to add task
+    document.getElementById("taskInput").addEventListener("keypress", function(e) {
+      if (e.key === "Enter") handleAdd();
+    });
+
+    // Initial render
+    renderTasks();
+  </script>
+
+</body>
+</html>
